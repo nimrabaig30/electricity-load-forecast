@@ -56,10 +56,14 @@ n_jobs: -1
 The data is divided chronologically into 80% training data and 20% testing data.
 
 Results
-Model	MAE	RMSE
-Previous-Day Baseline	9043.20	14431.27
-Random Forest	4419.17	6743.08
-Improved Random Forest	4230.12	6451.62
+
+![Model Performance Comparison](images/model_comparison.png)
+
+| Model | MAE | RMSE |
+
+| Previous-Day Baseline | 9043.20 | 14431.27 |
+| Random Forest | 4419.17 | 6743.08 |
+| Improved Random Forest | 4230.12 | 6451.62 |
 
 The Improved Random Forest achieved:
 
