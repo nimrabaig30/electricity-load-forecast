@@ -25,11 +25,11 @@ EVALUATION_OUTPUT_PATH = "outputs/model_evaluation.csv"
 
 def train_model():
 
-    # Load and process data
+    # Load and validate data
     df = load_raw_data(RAW_DATA_PATH)
-
     validate_data(df)
 
+    # Feature engineering
     df = create_total_load(df)
     df = create_time_features(df)
     df = create_lag_features(df)
@@ -37,7 +37,7 @@ def train_model():
 
     model_df = prepare_model_data(df)
 
-    # Chronological train/test split
+    # Chronological train-test split
     split_index = int(len(model_df) * 0.8)
 
     train_df = model_df.iloc[:split_index]
@@ -63,7 +63,28 @@ def train_model():
     X_test = test_df[features]
     y_test = test_df["total_load"]
 
-    # Train model
+    # -----------------------------
+    # 1. Previous-Day Baseline
+    # -----------------------------
+
+    baseline_predictions = test_df["lag_96"]
+
+    baseline_mae = mean_absolute_error(
+        y_test,
+        baseline_predictions
+    )
+
+    baseline_rmse = np.sqrt(
+        mean_squared_error(
+            y_test,
+            baseline_predictions
+        )
+    )
+
+    # -----------------------------
+    # 2. Random Forest
+    # -----------------------------
+
     model = RandomForestRegressor(
         n_estimators=100,
         random_state=42,
@@ -72,23 +93,48 @@ def train_model():
 
     model.fit(X_train, y_train)
 
-    # Generate predictions
     predictions = model.predict(X_test)
 
-    # Evaluate
-    mae = mean_absolute_error(y_test, predictions)
-    rmse = np.sqrt(mean_squared_error(y_test, predictions))
+    rf_mae = mean_absolute_error(
+        y_test,
+        predictions
+    )
 
+    rf_rmse = np.sqrt(
+        mean_squared_error(
+            y_test,
+            predictions
+        )
+    )
+
+    # -----------------------------
     # Save model
+    # -----------------------------
+
     os.makedirs("outputs", exist_ok=True)
 
-    joblib.dump(model, MODEL_OUTPUT_PATH)
+    joblib.dump(
+        model,
+        MODEL_OUTPUT_PATH
+    )
 
-    # Save evaluation
+    # -----------------------------
+    # Model comparison
+    # -----------------------------
+
     evaluation = pd.DataFrame({
-        "Model": ["Improved Random Forest"],
-        "MAE": [mae],
-        "RMSE": [rmse]
+        "Model": [
+            "Previous-Day Baseline",
+            "Improved Random Forest"
+        ],
+        "MAE": [
+            baseline_mae,
+            rf_mae
+        ],
+        "RMSE": [
+            baseline_rmse,
+            rf_rmse
+        ]
     })
 
     evaluation.to_csv(
@@ -96,9 +142,10 @@ def train_model():
         index=False
     )
 
-    print("Model training completed!")
-    print("MAE :", round(mae, 2))
-    print("RMSE:", round(rmse, 2))
+    print("\nModel Evaluation:")
+    print(evaluation)
+
+    print("\nModel training completed!")
     print("Model saved to:", MODEL_OUTPUT_PATH)
     print("Evaluation saved to:", EVALUATION_OUTPUT_PATH)
 
