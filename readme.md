@@ -8,6 +8,16 @@ This project predicts electricity load using the UCI ElectricityLoadDiagrams2011
 
 The dataset contains electricity consumption data from 370 clients recorded at 15-minute intervals.
 
+## Key Highlights
+
+- Processed electricity consumption data from 370 clients.
+- Built a time-series forecasting pipeline using Python and Scikit-learn.
+- Engineered lag-based and rolling statistical features.
+- Used chronological train-test splitting to evaluate future-period predictions.
+- Compared the model against a previous-day baseline.
+- Achieved a 53.22% reduction in MAE and a 55.29% reduction in RMSE compared with the baseline.
+- Automated model training, evaluation, and prediction generation.
+
 The project includes:
 
 Data validation
